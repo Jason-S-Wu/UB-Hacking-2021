@@ -1,5 +1,4 @@
 const axios = require('axios');
-const fs = require('fs');
 const cheerio = require('cheerio');
 
 async function getSchedule(semester, dep) {
@@ -9,7 +8,7 @@ async function getSchedule(semester, dep) {
   data = cheerio.load(data);
   let result = [];
   let length = data('body > table:nth-child(10) > tbody').children().length;
-  for (let i = 5; i < length; i++) {
+  for (let i = 5; i <= length; i++) {
     let course = {};
     course.code = data(
       `body > table:nth-child(10) > tbody > tr:nth-child(${i}) > td:nth-child(2)`
@@ -55,4 +54,33 @@ async function getSchedule(semester, dep) {
   });
 
   return unique;
+}
+
+async function rateMyProfessor(instructor) {
+  const url = 'https://www.ratemyprofessors.com/graphql';
+  let headers = {
+    Authorization: 'Basic dGVzdDp0ZXN0',
+  };
+  let postData = {
+    query:
+      'query TeacherSearchResultsPageQuery(\n  $query: TeacherSearchQuery!\n  $schoolID: ID\n) {\n  search: newSearch {\n    ...TeacherSearchPagination_search_1ZLmLD\n  }\n  school: node(id: $schoolID) {\n    __typename\n    ... on School {\n      name\n    }\n    id\n  }\n}\n\nfragment TeacherSearchPagination_search_1ZLmLD on newSearch {\n  teachers(query: $query, first: 8, after: "") {\n    didFallback\n    edges {\n      cursor\n      node {\n        ...TeacherCard_teacher\n        id\n        __typename\n      }\n    }\n    pageInfo {\n      hasNextPage\n      endCursor\n    }\n    resultCount\n  }\n}\n\nfragment TeacherCard_teacher on Teacher {\n  id\n  legacyId\n  avgRating\n  numRatings\n  ...CardFeedback_teacher\n  ...CardSchool_teacher\n  ...CardName_teacher\n  ...TeacherBookmark_teacher\n}\n\nfragment CardFeedback_teacher on Teacher {\n  wouldTakeAgainPercent\n  avgDifficulty\n}\n\nfragment CardSchool_teacher on Teacher {\n  department\n  school {\n    name\n    id\n  }\n}\n\nfragment CardName_teacher on Teacher {\n  firstName\n  lastName\n}\n\nfragment TeacherBookmark_teacher on Teacher {\n  id\n  isSaved\n}\n',
+    variables: {
+      query: {
+        text: `${instructor}`,
+        schoolID: 'U2Nob29sLTk2MA==',
+        fallback: true,
+      },
+      schoolID: 'U2Nob29sLTk2MA==',
+    },
+  };
+  const response = await axios.post(url, postData, {
+    headers: headers,
+  });
+  let instructorData = response.data.data.search.teachers.edges[0].node;
+  let returnData = {};
+  returnData.name = instructorData.lastName;
+  returnData.difficulty = instructorData.avgDifficulty;
+  returnData.rating = instructorData.avgRating;
+  returnData.numRatings = instructorData.numRatings;
+  return returnData;
 }
