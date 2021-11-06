@@ -1,0 +1,22 @@
+{
+  "name": "ub-hacking-2021",
+  "version": "1.0.0",
+  "description": "Scrapes Rate My Professor and UB Schedule Website for Ratings",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jason-S-Wu/UB-Hacking-2021.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jason-S-Wu/UB-Hacking-2021/issues"
+  },
+  "homepage": "https://github.com/Jason-S-Wu/UB-Hacking-2021#readme",
+  "dependencies": {
+    "axios": "^0.24.0"
+  }
+}
